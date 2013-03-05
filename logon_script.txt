@@ -1,0 +1,7 @@
+event id 4624: account logon
+event id 4647: account logoff
+logon type 2: interactive
+logon type 3: network
+
+$filter = @{LogName='Security';id=4624,4647}
+Get-WinEvent -FilterHashTable $filter
