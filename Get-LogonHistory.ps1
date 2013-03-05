@@ -15,5 +15,9 @@ foreach($logon in $logons) {
 		$user = $matches[1]
 	}
 	$time = Get-Date $logon.TimeGenerated
-	Write-Host "$user,$logonType,$time"
+	$output = New-Object -Type PSCustomObject
+	Add-Member -MemberType NoteProperty -Name 'UserName' -Value $user -InputObject $output
+	Add-Member -MemberType NoteProperty -Name 'LogonType' -Value $logonType -InputObject $output
+	Add-Member -MemberType NoteProperty -Name 'Time' -Value $time -InputObject $output
+	Write-Output $output
 }
