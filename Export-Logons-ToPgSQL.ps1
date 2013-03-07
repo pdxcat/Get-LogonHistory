@@ -1,7 +1,7 @@
 # Export login data into PostgreSQL DB.
 # Requires that an appropriately named PgSQL ODBC Data Source be created first.
 
-function Export-Logins-ToPGSQL {
+function Export-Logons-ToPgSQL {
 	[CmdletBinding()]
 	param(
 		[Parameter(Mandatory=$true,
