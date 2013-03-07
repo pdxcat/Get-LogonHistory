@@ -23,7 +23,7 @@ function Export-Logons-ToPgSQL {
 	BEGIN{
 		$DBConn = New-Object System.Data.Odbc.OdbcConnection('DSN=Pgsql_logondb')
 		$DBCmd = $DBConn.CreateCommand()
-		$DBCmd.CommandText = 'INSERT INTO logins (username,compname,logontype,action,date,time) VALUES (?,?,?,?,?,?);'
+		$DBCmd.CommandText = 'INSERT INTO logons (username,compname,logontype,action,date,time) VALUES (?,?,?,?,?,?);'
 		[void]$DBCmd.Parameters.Add('@username', [System.Data.Odbc.OdbcType]::varchar, 20)
 		[void]$DBCmd.Parameters.Add('@compname', [System.Data.Odbc.OdbcType]::varchar, 20)
 		[void]$DBCmd.Parameters.Add('@logontype', [System.Data.Odbc.OdbcType]::varchar, 10)
