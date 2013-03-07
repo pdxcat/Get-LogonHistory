@@ -2,9 +2,6 @@
 # Fetch console login data from the local machine.
 
 function Get-Win7LogonHistory {
-	param(
-		[String]$ComputerName = 'localhost'
-	)
 	$events = Get-EventLog Security -AsBaseObject -InstanceId 4624,4647
 	$logons = $events | Where-Object { ($_.InstanceId -eq 4647) `
 	                              -or (($_.InstanceId -eq 4624) -and ($_.Message -match "Logon Type:\s+2")) `
@@ -50,12 +47,13 @@ function Get-Win7LogonHistory {
 	
 		# As long as we managed to parse the Event, print output.
 		if ($user) {
-			$time = Get-Date $logon.TimeGenerated
+			$timeStamp = Get-Date $logon.TimeGenerated
 			$output = New-Object -Type PSCustomObject
 			Add-Member -MemberType NoteProperty -Name 'UserName' -Value $user -InputObject $output
+			Add-Member -MemberType NoteProperty -Name 'ComputerName' -Value $env:computername -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'Action' -Value $action -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'LogonType' -Value $logonType -InputObject $output
-			Add-Member -MemberType NoteProperty -Name 'Time' -Value $time -InputObject $output
+			Add-Member -MemberType NoteProperty -Name 'TimeStamp' -Value $timeStamp -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'Index' -Value $index -InputObject $output
 			Write-Output $output
 		}
@@ -63,9 +61,6 @@ function Get-Win7LogonHistory {
 }
 
 function Get-WinXPLogonHistory {
-	param(
-		[String]$ComputerName = 'localhost'
-	)
 	$events = Get-EventLog Security -AsBaseObject -InstanceId 528,551
 	$logons = $events | Where-Object { ($_.InstanceId -eq 551) `
 	                              -or (($_.InstanceId -eq 528) -and ($_.Message -match "Logon Type:\s+2")) `
@@ -111,12 +106,13 @@ function Get-WinXPLogonHistory {
 	
 		# As long as we managed to parse the Event, print output.
 		if ($user) {
-			$time = Get-Date $logon.TimeGenerated
+			$timeStamp = Get-Date $logon.TimeGenerated
 			$output = New-Object -Type PSCustomObject
 			Add-Member -MemberType NoteProperty -Name 'UserName' -Value $user -InputObject $output
+			Add-Member -MemberType NoteProperty -Name 'ComputerName' -Value $env:computername -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'Action' -Value $action -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'LogonType' -Value $logonType -InputObject $output
-			Add-Member -MemberType NoteProperty -Name 'Time' -Value $time -InputObject $output
+			Add-Member -MemberType NoteProperty -Name 'TimeStamp' -Value $timeStamp -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'Index' -Value $index -InputObject $output
 			Write-Output $output
 		}
