@@ -12,8 +12,8 @@ Export-Logons-ToPgSQL
 =====================
 
 A PowerShell module containing a function that takes logon data and 
-pipes it into a PostgreSQL database.
-
+pipes it into a PostgreSQL database. It was necessary to make this a
+function instead of a script so it could handle pipeline input.
 
 Usage:
 
