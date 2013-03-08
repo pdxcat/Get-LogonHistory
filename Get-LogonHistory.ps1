@@ -1,5 +1,45 @@
-# Get-Logins
-# Fetch console login data from the local machine.
+<#
+.Synopsis
+	Extracts recent logon history for the local machine from the Security Event Log.
+.Description
+	This script scans through the Security Event Log on the local machine for interactive logons (both local and remote), and logouts.
+	
+	It then constructs a PowerShell Custom Object containing the fields of interest and writes that object to the pipeline as its output.
+	
+	To run this function on a remote computer, use it in conjunction with the Invoke-Command cmdlet.
+.Inputs
+	None. You cannot pipe input to this script.
+.Outputs
+	System.Management.Automation.PSCustomObject
+	
+	Get-LogonHistory returns a custom object containing the following properties:
+	
+	[String]UserName
+		The username of the account that logged on/off of the machine.
+	[String]ComputerName
+		The name of the computer that the user logged on to/off of.
+	[String]Action
+		The action the user took with regards to the computer. Either 'logon' or 'logoff'.
+	[String]LogonType
+		Either 'console' or 'remote', depending on how the user logged on. This property is null if the user logged off.
+	[DateTime]TimeStamp
+		A DateTime object representing the date and time that the user logged on/off.
+.Notes
+	
+.Example
+	.\Get-LogonHistory.ps1
+	
+	Description
+	-----------
+	Gets the available logon entries in the Security log on the local computer.
+.Example
+	Invoke-Command -ComputerName 'remotecomputer' -File '.\Get-LogonHistory.ps1'
+	
+	Description
+	-----------
+	Gets the available logon entries in the Security log on a remote computer named 'remotecomputer'.
+#>
+
 
 function Get-Win7LogonHistory {
 	$events = Get-EventLog Security -AsBaseObject -InstanceId 4624,4647
@@ -43,7 +83,6 @@ function Get-Win7LogonHistory {
 				Write-Error "Unable to parse Security log. Malformed entry? Index: $logon.Index"
 			}
 		}
-		$index = $logon.index
 	
 		# As long as we managed to parse the Event, print output.
 		if ($user) {
@@ -54,7 +93,6 @@ function Get-Win7LogonHistory {
 			Add-Member -MemberType NoteProperty -Name 'Action' -Value $action -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'LogonType' -Value $logonType -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'TimeStamp' -Value $timeStamp -InputObject $output
-			Add-Member -MemberType NoteProperty -Name 'Index' -Value $index -InputObject $output
 			Write-Output $output
 		}
 	}
@@ -102,7 +140,6 @@ function Get-WinXPLogonHistory {
 				Write-Error "Unable to parse Security log. Malformed entry? Index: $logon.Index"
 			}
 		}
-		$index = $logon.index
 	
 		# As long as we managed to parse the Event, print output.
 		if ($user) {
@@ -113,18 +150,14 @@ function Get-WinXPLogonHistory {
 			Add-Member -MemberType NoteProperty -Name 'Action' -Value $action -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'LogonType' -Value $logonType -InputObject $output
 			Add-Member -MemberType NoteProperty -Name 'TimeStamp' -Value $timeStamp -InputObject $output
-			Add-Member -MemberType NoteProperty -Name 'Index' -Value $index -InputObject $output
 			Write-Output $output
 		}
 	}
 }
 
-# Determine Operating System version
 $OSversion = (Get-WmiObject -Query 'SELECT version FROM Win32_OperatingSystem').version
 if ($OSversion -ge 6) {
-	# Windows Vista/7/8
 	Get-Win7LogonHistory
 } else {
-	# Windows XP
 	Get-WinXPLogonHistory
 }
