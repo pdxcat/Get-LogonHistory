@@ -4,9 +4,9 @@ Get-LogonHistory
 Gets recent logons/logouts from the Windows Security Log on the local
 machine, and outputs them as custom PowerShell objects.
 
-Usage: .\Get-LogonHistory
+Usage: .\Get-LogonHistory.ps1
 
-Use Get-Help .\Get-LogonHistory for more information.
+Use Get-Help .\Get-LogonHistory.ps1 for more information.
 
 Export-Logons-ToPgSQL
 =====================
