@@ -6,6 +6,8 @@
 	
 	It then constructs a PowerShell Custom Object containing the fields of interest and writes that object to the pipeline as its output.
 	
+	NOTE: This script must be run 'As Administrator' in order to access the Security Event Log.
+	
 	To run this function on a remote computer, use it in conjunction with the Invoke-Command cmdlet.
 .Inputs
 	None. You cannot pipe input to this script.

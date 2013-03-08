@@ -27,8 +27,6 @@
 .Outputs
 	Export-Logons-ToPgSQL writes a summary of changes to the console window, indicating how many new rows were inserted, how many rows were already in the database (and therefore rejected), and how many inserts failed due to some other error.
 	
-.Notes
-	
 .Example
 	.\Get-LogonHistory.ps1 | Export-Logons-ToPgSQL
 	
