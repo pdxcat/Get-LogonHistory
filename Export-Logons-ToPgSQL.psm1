@@ -79,7 +79,12 @@ function Export-Logons-ToPgSQL {
 		[void]$DBCmd.Parameters.Add('@date', [System.Data.Odbc.OdbcType]::date)
 		[void]$DBCmd.Parameters.Add('@time', [System.Data.Odbc.OdbcType]::time)
 		$newRows = $oldRows = $errRows = 0
-		$DBCmd.Connection.Open() # Note: Do error checking here (for failure to connect, and authentication).
+		try {
+			$DBCmd.Connection.Open()
+		} catch {
+			Write-Error $_
+			break
+		}
 	}
 	
 	PROCESS {
