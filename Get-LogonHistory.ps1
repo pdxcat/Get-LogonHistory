@@ -44,17 +44,21 @@
 
 
 function Get-Win7LogonHistory {
-	$events = Get-EventLog Security -AsBaseObject -InstanceId 4624,4647
-	$logons = $events | Where-Object { ($_.InstanceId -eq 4647) `
-	                              -or (($_.InstanceId -eq 4624) -and ($_.Message -match "Logon Type:\s+2")) `
-	                              -or (($_.InstanceId -eq 4624) -and ($_.Message -match "Logon Type:\s+10")) }
-	if ($logons) {
-		foreach($logon in $logons) {
+	$logons = Get-EventLog Security -AsBaseObject -InstanceId 4624,4647 |
+	          Where-Object { ($_.InstanceId -eq 4647) `
+	                    -or (($_.InstanceId -eq 4624) -and ($_.Message -match "Logon Type:\s+2")) `
+	                    -or (($_.InstanceId -eq 4624) -and ($_.Message -match "Logon Type:\s+10")) }
+	$poweroffs = Get-EventLog System -AsBaseObject -InstanceId 41
+	$events = $logons + $poweroffs | Sort-Object TimeGenerated
+	
+	if ($events) {
+		foreach($event in $events) {
 			# Parse logon data from the Event.
-			if ($logon.InstanceId -eq 4624) {
+			if ($event.InstanceId -eq 4624) {
+				# A user logged on.
 				$action = 'logon'
 				
-				$logon.Message -match "Logon Type:\s+(\d+)" | Out-Null
+				$event.Message -match "Logon Type:\s+(\d+)" | Out-Null
 				$logonTypeNum = $matches[1]
 				
 				# Determine logon type.
@@ -67,30 +71,35 @@ function Get-Win7LogonHistory {
 				}
 				
 				# Determine user.
-				if ($logon.message -match "New Logon:\s*Security ID:\s*.*\s*Account Name:\s*(\w+)") {
+				if ($event.message -match "New Logon:\s*Security ID:\s*.*\s*Account Name:\s*(\w+)") {
 					$user = $matches[1]
 				} else {
-					$index = $logon.index
+					$index = $event.index
 					Write-Warning "Unable to parse Security log Event. Malformed entry? Index: $index"
 				}
 				
-			} else {
+			} elseif ($event.InstanceId -eq 4647) {
+				# A user logged off.
 				$action = 'logoff'
-				
 				$logonType = $null
 				
 				# Determine user.
-				if ($logon.message -match "Subject:\s*Security ID:\s*.*\s*Account Name:\s*(\w+)") {
+				if ($event.message -match "Subject:\s*Security ID:\s*.*\s*Account Name:\s*(\w+)") {
 					$user = $matches[1]
 				} else {
-					$index = $logon.index
+					$index = $event.index
 					Write-Warning "Unable to parse Security log Event. Malformed entry? Index: $index"
 				}
+			} elseif ($event.InstanceId -eq 41) {
+				# The computer crashed.
+				$action = 'logoff'
+				$logonType = $null
+				$user = '*'
 			}
 		
 			# As long as we managed to parse the Event, print output.
 			if ($user) {
-				$timeStamp = Get-Date $logon.TimeGenerated
+				$timeStamp = Get-Date $event.TimeGenerated
 				$output = New-Object -Type PSCustomObject
 				Add-Member -MemberType NoteProperty -Name 'UserName' -Value $user -InputObject $output
 				Add-Member -MemberType NoteProperty -Name 'ComputerName' -Value $env:computername -InputObject $output
@@ -104,18 +113,23 @@ function Get-Win7LogonHistory {
 		Write-Host "No recent logon/logoff events."
 	}
 }
+
 function Get-WinXPLogonHistory {
-	$events = Get-EventLog Security -AsBaseObject -InstanceId 528,551
-	$logons = $events | Where-Object { ($_.InstanceId -eq 551) `
-	                              -or (($_.InstanceId -eq 528) -and ($_.Message -match "Logon Type:\s+2")) `
-	                              -or (($_.InstanceId -eq 528) -and ($_.Message -match "Logon Type:\s+10")) }
-	if ($logons) {
-		foreach($logon in $logons) {
+	$logons = Get-EventLog Security -AsBaseObject -InstanceId 528,551 |
+	          Where-Object { ($_.InstanceId -eq 551) `
+	                    -or (($_.InstanceId -eq 528) -and ($_.Message -match "Logon Type:\s+2")) `
+	                    -or (($_.InstanceId -eq 528) -and ($_.Message -match "Logon Type:\s+10")) }
+	#$poweroffs = Get-Eventlog System -AsBaseObject -InstanceId 6008
+	#$events = $logons + $poweroffs | Sort-Object TimeGenerated
+	
+	if ($events) {
+		foreach($event in $events) {
 			# Parse logon data from the Event.
-			if ($logon.InstanceId -eq 528) {
+			if ($event.InstanceId -eq 528) {
+				# A user logged on.
 				$action = 'logon'
 				
-				$logon.Message -match "Logon Type:\s+(\d+)" | Out-Null
+				$event.Message -match "Logon Type:\s+(\d+)" | Out-Null
 				$logonTypeNum = $matches[1]
 				
 				# Determine logon type.
@@ -128,30 +142,35 @@ function Get-WinXPLogonHistory {
 				}
 				
 				# Determine user.
-				if ($logon.message -match "Successful Logon:\s*User Name:\s*(\w+)") {
+				if ($event.message -match "Successful Logon:\s*User Name:\s*(\w+)") {
 					$user = $matches[1]
 				} else {
-					$index = $logon.index
+					$index = $event.index
 					Write-Warning "Unable to parse Security log Event. Malformed entry? Index: $index"
 				}
 				
-			} else {
+			} elseif ($event.InstanceId -eq 551) {
+				# A user logged off.
 				$action = 'logoff'
-				
 				$logonType = $null
 				
 				# Determine user.
-				if ($logon.message -match "User initiated logoff:\s*User Name:\s*(\w+)") {
+				if ($event.message -match "User initiated logoff:\s*User Name:\s*(\w+)") {
 					$user = $matches[1]
 				} else {
-					$index = $logon.index
+					$index = $event.index
 					Write-Warning "Unable to parse Security log Event. Malformed entry? Index: $index"
 				}
-			}
+			}# elseif ($event.InstanceId -eq 6008) {
+				# The computer crashed.
+			#	$action = 'logoff'
+			#	$logonType = $null
+			#	$user = '*'
+			#}
 		
 			# As long as we managed to parse the Event, print output.
 			if ($user) {
-				$timeStamp = Get-Date $logon.TimeGenerated
+				$timeStamp = Get-Date $event.TimeGenerated
 				$output = New-Object -Type PSCustomObject
 				Add-Member -MemberType NoteProperty -Name 'UserName' -Value $user -InputObject $output
 				Add-Member -MemberType NoteProperty -Name 'ComputerName' -Value $env:computername -InputObject $output
