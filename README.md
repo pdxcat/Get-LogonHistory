@@ -35,9 +35,9 @@ target database.
 
 The script assumes the following database schema:
 
-TABLE logons(username VARCHAR(20), compname VARCHAR(20),
-             logontype VARCHAR(10), action VARCHAR(10), date DATE,
-             time TIME, PRIMARY KEY (username,compname,action,date,time))
+	TABLE logons(username VARCHAR(20), compname VARCHAR(20),\n
+				 logontype VARCHAR(10), action VARCHAR(10), date DATE,\n
+				 time TIME, PRIMARY KEY (username,compname,action,date,time))
 
 Use Get-Help Export-Logons-ToPgSQL after importing the module for more
 information.
