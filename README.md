@@ -8,9 +8,7 @@ Usage:
 ------
 	.\Get-LogonHistory.ps1
 
-Use Get-Help
------------- 
-.\Get-LogonHistory.ps1 for more information.
+Use Get-Help .\Get-LogonHistory.ps1 for more information.
 
 Export-Logons-ToPgSQL
 =====================
@@ -24,9 +22,7 @@ Usage:
 To use the function, first import the module into your PowerShell
 session by using the Import-Module cmdlet, e.g.
 
-Import-Module 
--------------
-	'\\path\to\Export-Logons-ToPgSQL.psm1'
+	Import-Module '\\path\to\Export-Logons-ToPgSQL.psm1'
 
 You can then call the function as if it were a cmdlet itself, e.g.
 
